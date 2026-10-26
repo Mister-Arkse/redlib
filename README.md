@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> This fork was created to for the sole purpose of merging [PR #603](https://github.com/redlib-org/redlib/pull/603) for my own local instance.
+> This fork was created for the sole purpose of merging [PR #603](https://github.com/redlib-org/redlib/pull/603) to run my own local instance.
 > 
 > Use at your own risk, no support will be provided.
 
