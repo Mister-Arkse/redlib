@@ -50,7 +50,12 @@ pub async fn profile(req: Request<Body>) -> Result<Response<Body>, String> {
 	let username = req.param("name").unwrap_or_default();
 
 	// Retrieve info from user about page.
-	let user = user(&username).await.unwrap_or_default();
+	let user = user(&username).await.unwrap_or_else(|e| {
+		// The profile lookup is optional (the listing below does not need it),
+		// but a silent failure leaves the page without a name, so say why.
+		log::error!("Failed to load profile info for u/{username}: {e}");
+		User::default()
+	});
 
 	let req_url = req.uri().to_string();
 	// Return landing page if this post if this Reddit deems this user NSFW,
