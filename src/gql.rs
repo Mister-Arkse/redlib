@@ -166,8 +166,10 @@ fn parse_path(path: &str) -> Option<(String, Option<String>)> {
 	let tail = if let Some(tail) = base.strip_prefix("/comments/") {
 		tail
 	} else {
-		let (sub, rest) = base.strip_prefix("/r/")?.split_once('/')?;
-		if sub.is_empty() {
+		// Posts are also served under a user profile (/user/<name>/ and /u/<name>/)
+		let scoped = base.strip_prefix("/r/").or_else(|| base.strip_prefix("/user/")).or_else(|| base.strip_prefix("/u/"))?;
+		let (owner, rest) = scoped.split_once('/')?;
+		if owner.is_empty() {
 			return None;
 		}
 		rest.strip_prefix("comments/")?
@@ -437,6 +439,8 @@ mod tests {
 			"/r/unixporn/comments/1xdp2ww/title/.json?sort=new",
 			"/comments/1xdp2ww.json",
 			"/r/comments/comments/1xdp2ww/.json",
+			"/user/someone/comments/1xdp2ww/title/.json?sort=new",
+			"/u/someone/comments/1xdp2ww/.json",
 		] {
 			assert_eq!(parse_path(path), Some(("1xdp2ww".into(), None)));
 		}
@@ -444,10 +448,16 @@ mod tests {
 			parse_path("/r/unixporn/comments/1xdp2ww/title/abc/.json?context=3"),
 			Some(("1xdp2ww".into(), Some("abc".into())))
 		);
+		assert_eq!(
+			parse_path("/user/someone/comments/1xdp2ww/title/abc/.json?context=3"),
+			Some(("1xdp2ww".into(), Some("abc".into())))
+		);
 		for path in [
 			"/r/rust/hot.json",
 			"/user/a/comments.json",
 			"/r//comments/abc.json",
+			"/user//comments/abc.json",
+			"/u/someone/hot.json",
 			"/comments/.json",
 			"/comments/a/title/b/extra.json",
 			"/comments/a%2fb.json",
