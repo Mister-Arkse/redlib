@@ -54,7 +54,12 @@ pub async fn profile(req: Request<Body>) -> Result<Response<Body>, String> {
 		// The profile lookup is optional (the listing below does not need it),
 		// but a silent failure leaves the page without a name, so say why.
 		log::error!("Failed to load profile info for u/{username}: {e}");
-		User::default()
+		// Keep the requested name: the page header and the Overview/Comments/Submitted
+		// tab links are built from it. Karma, creation date, etc. stay at their defaults.
+		User {
+			name: username.clone(),
+			..User::default()
+		}
 	});
 
 	let req_url = req.uri().to_string();
